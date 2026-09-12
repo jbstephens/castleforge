@@ -21,6 +21,7 @@ const srv = http.createServer((req, res) => {
   catch (e) { res.statusCode = 404; res.end(); }
 }).listen(0);
 const port = srv.address().port;
+fs.rmSync(path.join(SC, 'cf-war-profile'), { recursive: true, force: true });   // hermetic: no slot saves from a prior run
 const chrome = cp.spawn('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   ['--headless=new', '--mute-audio', '--remote-debugging-port=0', '--window-size=1280,720',
    '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--no-first-run',

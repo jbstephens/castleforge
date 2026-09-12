@@ -17,6 +17,7 @@ const srv = http.createServer((req, res) => {
   catch (e) { res.statusCode = 404; res.end(); }
 }).listen(0);
 const port = srv.address().port;
+fs.rmSync(path.join(SC, 'cf-smoke-2p-profile'), { recursive: true, force: true });   // hermetic: no slot saves from a prior run
 const chrome = cp.spawn('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   ['--headless=new', '--mute-audio', '--remote-debugging-port=0', '--window-size=1280,720',
    '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--no-first-run',
@@ -109,8 +110,9 @@ await shot('cf2-title');
 /* ── 1P unchanged ── */
 console.log('— 1P baseline —');
 await ev('__press(0, 9)'); await sleep(900);            // START on title = ignored (south confirms)
-await ev('__press(0, 0)'); await sleep(1800);           // pad0 south = begin
-assert(await ev('scene') === 'play', 'pad0 south starts the game');
+await ev('__press(0, 0)'); await sleep(1400);           // pad0 south = pick slot 1 (empty → naming screen)
+if (await ev("scene === 'title'")) { await ev('__press(0, 0)'); await sleep(1800); }   // ✓ BEGIN with the default name
+assert(await ev('scene') === 'play', 'pad0 south starts the game (via the naming screen)');
 assert(await ev('player2.active') === false, 'no P2 before a join press');
 await ev('__press(1, 2)'); await sleep(500);            // pad1 west pre-join: must do nothing
 assert(await ev('panelMode') === null, 'pad1 buttons inert before join (west opens nothing)');
